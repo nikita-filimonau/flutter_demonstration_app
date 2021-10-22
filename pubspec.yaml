@@ -1,0 +1,44 @@
+name: demonstration_project
+description: Demonstration project with spltied enviroments
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.15.0-178.0.dev <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.2
+  provider: ^6.0.0
+  http: ^0.13.3
+  intl: ^0.17.0
+  firebase_core: ^1.6.0
+  firebase_analytics: ^8.3.1
+  firebase_crashlytics: ^2.2.1
+  shared_preferences: ^2.0.7
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^1.0.0
+
+flutter:
+
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+
+    fonts:
+      - family: OpenSans
+        fonts:
+          - asset: assets/fonts/OpenSans-Regular.ttf
+          - asset: assets/fonts/OpenSans-Italic.ttf
+            style: italic
+          - asset: assets/fonts/OpenSans-Bold.ttf
+            weight: 700
