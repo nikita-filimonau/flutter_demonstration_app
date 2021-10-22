@@ -1,0 +1,74 @@
+platform :android do
+  desc "Building your App in version beta"
+  lane :fire_dev do |options|
+    ENV["ENVFILE"]=".env.#{ENV["BUILD_TYPE"]}"
+    puts "+---------------------------------+".bold.blue
+    puts "|-- Environment: #{options[:env]} 🚀 --|".bold.blue
+    puts "+---------------------------------+".bold.blue
+    firebase_app_distribution(
+      app: ENV['ANDROID_APP_ID'],
+      groups: ENV["GROUPS"] || options[:groups],
+      release_notes: options[:notes] || "App Auto Build",
+      firebase_cli_token: ENV["FIREBASE_CLI_TOKEN"],
+      android_artifact_path: ENV["ANDROID_PATH_TO_FILE"]
+    )
+  end
+end
+
+platform :ios do
+  desc "Building your App in beta version"
+  lane :fire_dev do |options|
+    ENV["ENVFILE"]=".env.#{ENV["BUILD_TYPE"]}"
+    build(profile: options[:env])
+    firebase_app_distribution(
+      app: ENV['IOS_APP_ID'],
+      groups: ENV["GROUPS"] || options[:groups],
+      release_notes: options[:notes] || "Compliance App Auto Build",
+      firebase_cli_token: ENV["FIREBASE_CLI_TOKEN"]
+    )
+  end
+
+  private_lane :build do |options|
+    puts "+------------------------------------+".bold.blue
+    puts "|-- Environment: #{options[:profile]} 🚀 --|".bold.blue
+    puts "+------------------------------------+".bold.blue
+
+    import_certificate(
+      keychain_name: "login",
+      certificate_path: "certificates/Certificates.p12",
+      certificate_password: "1",
+      keychain_password: ""
+    )
+
+    profile_path = "./certificates/#{ENV["DISTRIBUTION_PROFILE_NAME"]}.mobileprovision"
+    install_provisioning_profile(path: profile_path)
+
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: "./ios/Runner.xcodeproj"
+    )
+    update_project_provisioning(
+      xcodeproj: "./ios/Runner.xcodeproj",
+      profile: profile_path,
+      target_filter: "Runner",
+      build_configuration: "Release"
+    )
+
+    scheme = "Runner"
+    method = "enterprise"
+    profile = ENV['DISTRIBUTION_PROFILE_FIREBASE']
+    build_app(
+      workspace: "./ios/Runner.xcworkspace",
+      scheme: scheme,
+      configuration: "Release",
+      export_options: {
+        method: method,
+        provisioningProfiles: {
+          ENV['BUNDLE_ID'] => profile
+        }
+      },
+      include_bitcode: true,
+      clean: true
+    )
+  end
+end
